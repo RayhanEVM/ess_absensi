@@ -1,0 +1,66 @@
+import 'dart:convert';
+
+import 'package:ess_app/url/url.dart';
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
+
+class RegisterController extends GetxController{
+  TextEditingController namaController = TextEditingController();
+  TextEditingController pController = TextEditingController();
+  TextEditingController employee_id_Controller = TextEditingController();
+
+
+  // final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+
+  Future<void> getdatakaryawan() async {
+    try {
+      var headers = {'Content-Type': 'application/json'};
+      var url = Uri.parse(
+        AppUrl.baseUrl + AppUrl.authEndPoints.register);
+      Map body = {
+        'employee_id': employee_id_Controller.text,
+        'username': usernameController.text,
+        'password': passwordController.text.trim(),
+
+      };
+
+      http.Response response =
+      await http.post(url, body: jsonEncode(body), headers: headers);
+      print(response.statusCode);
+
+      if (response.statusCode == 200) {
+        final json = jsonDecode(response.body);
+        print(response.body);
+        if (json['code'] == 200) {
+        // var token = json ['data']['token'];
+        // print(token);
+        // final SharedPreferences? prefs = await _prefs;
+
+        // await prefs?.setString('token', token);
+        // employee_id_Controller.clear();
+        // usernameController.clear();
+        // passwordController.clear();
+
+         } else if (json['code'] == 1) {
+          print(response.body);
+          throw jsonDecode(response.body)['message'];
+        }
+      } else {
+        print('ini dari else');
+        print(response.statusCode);
+        throw jsonDecode(response.body)["message"] ?? "Uknown Error";
+        
+      }
+    }catch (Error){
+      Get.back();
+      showDialog(context: Get.context!, builder: (context){
+        return SimpleDialog(
+          title: Text('Error'),
+          contentPadding: EdgeInsets.all(20),
+          children: [Text(Error.toString())],
+        );
+      });
+    }
+  }
+}
